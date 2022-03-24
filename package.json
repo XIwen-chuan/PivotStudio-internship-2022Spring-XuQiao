@@ -1,0 +1,15 @@
+{
+    "scripts": {
+        "build": "babel src/index.js -d lib",
+        "test": "babel test/index.js -d test/compiled --watch"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.17.6",
+        "@babel/core": "^7.17.8",
+        "@babel/preset-env": "^7.16.11",
+        "@babel/types": "^7.17.0"
+    },
+    "dependencies": {
+        "big.js": "^6.1.1"
+    }
+}
