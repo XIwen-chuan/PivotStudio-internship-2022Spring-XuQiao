@@ -7,11 +7,16 @@ module.exports = ({ types: t }) => {
             BinaryExpression(path) {
                 let pPath = path.findParent((path) => t.isProgram(path.node))
                 const node = path.node;
-                let hasInjected = falsel;
+                let hasInjected = false;
+
+                let leftNode = path.node.left;
+                let leftValue = leftNode.value;
+                let rightNode = path.node.right;
+                let rightValue = rightNode.value;
                 //判断表达式两边是否为数字
                 if (t.isNumericLiteral(node.left) && t.isNumericLiteral(node.right) && hasInjected == false) {
 
-                    pPath.node.body[0].insertBefore(t.functionDeclaration(
+                    pPath.get('body.0').insertBefore(t.functionDeclaration(
                         t.identifier("_cstmAdd"), [t.identifier("arg1"), t.identifier("arg2")],
                         t.blockStatement([
                             t.variableDeclaration("let", [t.variableDeclarator(
@@ -40,8 +45,8 @@ module.exports = ({ types: t }) => {
                             )
                         ], [])
                     ))
-                    pPath.node.body[0].insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmAdd"), [t.identifier("arg1"), t.identifier("arg2")],
+                    pPath.get('body.0').insertBefore(t.functionDeclaration(
+                        t.identifier("_cstmMinus"), [t.identifier("arg1"), t.identifier("arg2")],
                         t.blockStatement([
                             t.variableDeclaration("let", [t.variableDeclarator(
                                 t.identifier("multi"),
@@ -69,8 +74,8 @@ module.exports = ({ types: t }) => {
                             )
                         ], [])
                     ))
-                    pPath.node.body[0].insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmAdd"), [t.identifier("arg1"), t.identifier("arg2")],
+                    pPath.get('body.0').insertBefore(t.functionDeclaration(
+                        t.identifier("_cstmMulti"), [t.identifier("arg1"), t.identifier("arg2")],
                         t.blockStatement([
                             t.variableDeclaration("let", [t.variableDeclarator(
                                 t.identifier("multi"),
@@ -101,8 +106,8 @@ module.exports = ({ types: t }) => {
                             )
                         ], [])
                     ))
-                    pPath.node.body[0].insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmAdd"), [t.identifier("arg1"), t.identifier("arg2")],
+                    pPath.get('body.0').insertBefore(t.functionDeclaration(
+                        t.identifier("_cstmDiv"), [t.identifier("arg1"), t.identifier("arg2")],
                         t.blockStatement([
                             t.variableDeclaration("let", [t.variableDeclarator(
                                 t.identifier("multi"),
@@ -127,12 +132,12 @@ module.exports = ({ types: t }) => {
                             )
                         ], [])
                     ))
-                    pPath.node.body[0].insertBefore(t.functionDeclaration(
+                    pPath.get('body.0').insertBefore(t.functionDeclaration(
                         t.identifier("_getMulti"), [t.identifier("arg1"), t.identifier("arg2")],
                         t.blockStatement([
                             t.variableDeclaration("let", [t.variableDeclarator(t.identifier("multi1"))]),
                             t.variableDeclaration("let", [t.variableDeclarator(t.identifier("multi2"))]),
-                            t.forstatement(
+                            t.forStatement(
                                 t.assignmentExpression("=", t.identifier("multi1"), t.numericLiteral(1)),
                                 t.binaryExpression("<", t.identifier("multi1"), t.identifier("Infinity")),
                                 t.assignmentExpression(
@@ -161,7 +166,7 @@ module.exports = ({ types: t }) => {
                                     )
                                 ], [])
                             ),
-                            t.forstatement(
+                            t.forStatement(
                                 t.assignmentExpression("=", t.identifier("multi2"), t.numericLiteral(1)),
                                 t.binaryExpression("<", t.identifier("multi2"), t.identifier("Infinity")),
                                 t.assignmentExpression(
@@ -207,67 +212,43 @@ module.exports = ({ types: t }) => {
                         case "+":
                             path.replaceWith(
                                 t.callExpression(
-                                    t.memberExpression(
-                                        t.identifier("console"),
-                                        t.identifier("log")
-                                    ), [
-                                        t.callExpression(
-                                            t.identifier("_cstmAdd"), [
-                                                t.numericLiteral(path.node.left.value),
-                                                t.numericLiteral(path.node.right.value)
-                                            ]
-                                        )
+                                    t.identifier("_cstmAdd"), [
+                                        t.numericLiteral(leftValue),
+                                        t.numericLiteral(rightValue)
                                     ]
                                 )
                             )
+                            break
                         case "-":
                             path.replaceWith(
                                 t.callExpression(
-                                    t.memberExpression(
-                                        t.identifier("console"),
-                                        t.identifier("log")
-                                    ), [
-                                        t.callExpression(
-                                            t.identifier("_cstmMinus"), [
-                                                t.numericLiteral(path.node.left.value),
-                                                t.numericLiteral(path.node.right.value)
-                                            ]
-                                        )
+                                    t.identifier("_cstmMinus"), [
+                                        t.numericLiteral(leftValue),
+                                        t.numericLiteral(rightValue)
                                     ]
                                 )
                             )
+                            break
                         case "*":
                             path.replaceWith(
                                 t.callExpression(
-                                    t.memberExpression(
-                                        t.identifier("console"),
-                                        t.identifier("log")
-                                    ), [
-                                        t.callExpression(
-                                            t.identifier("_cstmMulti"), [
-                                                t.numericLiteral(path.node.left.value),
-                                                t.numericLiteral(path.node.right.value)
-                                            ]
-                                        )
+                                    t.identifier("_cstmMulti"), [
+                                        t.numericLiteral(leftValue),
+                                        t.numericLiteral(rightValue)
                                     ]
                                 )
                             )
+                            break
                         case "/":
                             path.replaceWith(
                                 t.callExpression(
-                                    t.memberExpression(
-                                        t.identifier("console"),
-                                        t.identifier("log")
-                                    ), [
-                                        t.callExpression(
-                                            t.identifier("_cstmDiv"), [
-                                                t.numericLiteral(path.node.left.value),
-                                                t.numericLiteral(path.node.right.value)
-                                            ]
-                                        )
+                                    t.identifier("_cstmDiv"), [
+                                        t.numericLiteral(leftValue),
+                                        t.numericLiteral(rightValue)
                                     ]
                                 )
                             )
+                            break
                     }
 
                     hasInjected = true;

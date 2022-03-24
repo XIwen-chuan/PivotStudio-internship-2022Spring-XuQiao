@@ -2,11 +2,29 @@
 PivotStudio-internship-2022Spring-XuQiao
 
 ### Babel计算器的实现
-- require与import的区别（为什么会污染全局变量？commenJS与ES6模块语法）
-- babel执行原理（安装、配置、使用、底层原理...）
-- AST（抽象语法树）的概念和原理
-- AST的trasever过程中使用visitor模式对JavaScript代码进行自定义转化编译
-- 自己实现一个补丁：
-    - 箭头函数变成普通函数
-    - let 变成 var
-    - 一些数组方法：forEach, fliter, find...
+
+## 运行方式
+./test/index.js 内是测试用例，可以随意写相关的代码，然后打命令`npm run test`执行编译，编译后的文件存放在 ./test/compiled/index.js 中。目前实现了两个数低精度下精准的四则运算操作。
+
+## 文件结构
+```
+---node_modules
+|
+|
+---src:其中的index.js为插件源码
+|
+|
+---test:放置测试用例和编译后的结果
+|
+|
+---babel.config.json: babel配置文件
+|
+|
+---package.json
+|
+|
+---DailyReport.md: 日志
+|
+|
+...
+```
