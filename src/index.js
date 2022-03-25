@@ -1,9 +1,15 @@
 //插件编写：实现一个Babel计算器插件，用以改善原生JavaScript中浮点数精度丢失的现象，以实现低精度下的精准计算
 
+const { arrowFunctionExpression } = require("@babel/types");
+let i = 1;
+let functionNameId;
+let functionName;
+
 
 module.exports = ({ types: t }) => {
     return {
         visitor: {
+            //Babel计算器的实现
             BinaryExpression(path) {
                 let pPath = path.findParent((path) => t.isProgram(path.node))
                 const node = path.node;
@@ -253,7 +259,56 @@ module.exports = ({ types: t }) => {
 
                     hasInjected = true;
                 }
-            }
+            },
+            /*
+                        VariableDeclarator(path){
+                            if(path.node.init.type == "ArrowFunctionExpression"){
+                                functionNameId = path.node.id;
+                                functionName = functionNameId.name;
+                            }
+                        },
+
+                        AssignmentExpression(path){
+                            if(path.node.right.type == "ArrowFunctionExpression"){
+                                functionNameId = path.node.left;
+                                functionName = functionNameId.name;
+                            }
+                        },
+            */
+            //箭头函数编译为普通函数。要考虑三种情况：参数是否有括号？函数体是否有大括号（是否为单语句返回）？函数体中是否存在this？
+            ArrowFunctionExpression(path) {
+                let newBlc;
+
+                if (t.isBlockStatement(path.node.body)) {
+                    newBlc = path.node.body;
+                } else {
+                    newBlc = t.blockStatement(
+                        [t.returnStatement(path.node.body)], [])
+                }
+                let newFuncNode = t.functionExpression(
+                    t.identifier(''),
+                    path.node.params,
+                    newBlc
+                )
+
+                const newVisitor1 = {
+                    ThisExpression(subPath) {
+                        path.getDeclarationParent().insertBefore(t.variableDeclaration("var", [
+                            t.variableDeclarator(
+                                t.identifier("_this"),
+                                t.thisExpression()
+                            ),
+                        ]))
+                        subPath.replaceWith(t.identifier("_this"))
+                    }
+                }
+
+                path.traverse(newVisitor1);
+                path.replaceWith(newFuncNode);
+                i++;
+            },
+
+
         }
     }
 }
