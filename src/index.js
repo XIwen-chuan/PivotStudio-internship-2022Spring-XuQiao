@@ -1,6 +1,6 @@
 //插件编写：实现一个Babel计算器插件，用以改善原生JavaScript中浮点数精度丢失的现象，以实现低精度下的精准计算
 
-const { arrowFunctionExpression } = require("@babel/types");
+
 let i = 1;
 let functionNameId;
 let functionName;
@@ -293,12 +293,7 @@ module.exports = ({ types: t }) => {
 
                 const newVisitor1 = {
                     ThisExpression(subPath) {
-                        path.getDeclarationParent().insertBefore(t.variableDeclaration("var", [
-                            t.variableDeclarator(
-                                t.identifier("_this"),
-                                t.thisExpression()
-                            ),
-                        ]))
+                        path.scope.parent.push({ id: t.identifier("_this"), init: t.thisExpression() });
                         subPath.replaceWith(t.identifier("_this"))
                     }
                 }
