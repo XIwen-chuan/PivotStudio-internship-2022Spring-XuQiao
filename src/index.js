@@ -289,22 +289,8 @@ module.exports = ({ types: t }) => {
                     hasInjected = true;
                 }
             },
-            /*
-                        VariableDeclarator(path){
-                            if(path.node.init.type == "ArrowFunctionExpression"){
-                                functionNameId = path.node.id;
-                                functionName = functionNameId.name;
-                            }
-                        },
 
-                        AssignmentExpression(path){
-                            if(path.node.right.type == "ArrowFunctionExpression"){
-                                functionNameId = path.node.left;
-                                functionName = functionNameId.name;
-                            }
-                        },
-            */
-            //箭头函数编译为普通函数。要考虑三种情况：参数是否有括号？函数体是否有大括号（是否为单语句返回）？函数体中是否存在this？
+            //箭头函数编译为普通函数。
             ArrowFunctionExpression(path) {
                 let newBlc;
 
@@ -332,7 +318,7 @@ module.exports = ({ types: t }) => {
                 i++;
             },
 
-            //let编译为var要注意的几点：可能存在的块级作用域消失带来的变量重名问题，暂时性死区问题，for循环的匿名自执行函数问题
+            //let编译为var要注意的几点：可能存在的块级作用域消失带来的变量重名问题，暂时性死区问题(?)，for循环的匿名自执行函数问题
 
             VariableDeclaration(path) {
                 const { node, parent, scope } = path;
