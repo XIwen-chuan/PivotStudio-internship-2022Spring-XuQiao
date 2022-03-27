@@ -1,7 +1,7 @@
-let a;
-let b = 1;
+var a;
+var b = 1;
 
-for (let i = 1; i < 2; i++) {
+for (var i = 1; i < 2; i++) {
   (function () {
     setTimeout(function () {}, 100);
   })();

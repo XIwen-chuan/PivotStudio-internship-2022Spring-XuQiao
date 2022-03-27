@@ -341,9 +341,10 @@ module.exports = ({ types: t }) => {
                 const subVisitor02 = {
                     BlockScoped(subPath) {
                         convertBlockScopedToVar(path, path.node, parent, scope, true);
-                        if (path.node.kind == 'let') { path.node.kind = 'var' }
                     }
                 }
+
+                if (path.node.kind == 'let') { path.node.kind = 'var' }
 
                 path.traverse(subVisitor02);
             },
