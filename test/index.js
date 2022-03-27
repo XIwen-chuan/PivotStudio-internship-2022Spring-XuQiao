@@ -1,8 +1,7 @@
-console.log(0.1 + 0.2)
-console.log(0.2 + 0.3)
+let a;
 
-a => a + 1;
+let b = 1;
 
-let c = (a, b) => {
-    return this.a1
+for (let i = 1; i < 2; i++) {
+    setTimeout(function() {}, 100)
 }
