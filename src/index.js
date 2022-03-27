@@ -14,16 +14,13 @@ function convertBlockScopedToVar(
     scope,
     moveBindingsToParent = false,
 ) {
-
     path.node[t.BLOCK_SCOPED_SYMBOL] = true;
     // let 替换为 var
     path.node.kind = "var";
-
     // 将绑定移到上级函数作用域或者全局作用域（函数作用域不存在的话）
     if (moveBindingsToParent) {
         // 获得函数作用已或者全局作用域
         const parentScope = scope.getFunctionParent() || scope.getProgramParent();
-
         // 遍历当前块作用域上绑定的变量
         for (const name of Object.keys(path.getBindingIdentifiers())) {
             const binding = scope.getOwnBinding(name);
@@ -339,8 +336,9 @@ module.exports = ({ types: t }) => {
                 //如果块作用域中的变量被内部函数引用，即存在闭包，则给当前代码套一层匿名自执行函数
 
                 //先判断是否是块级作用域
+                let vrbDclNode;
                 if (t.isVariableDeclaration(path.node.init)) {
-                    let vrbDclNode = path.node.init;
+                    vrbDclNode = path.node.init;
                     if (vrbDclNode.kind == 'let') {
                         let mainBody = path.node.body;
                         path.get('body').replaceWith(t.blockStatement(
@@ -356,18 +354,52 @@ module.exports = ({ types: t }) => {
                 //如果不存在闭包，则判断是否重名，若重名则重命名当前声明的变量名和子作用域下的引用变量名
                 //这里简化操作，直接改名
                 let variNames = [];
-                for (let declaration in vrbDclNode.declarations) {
-                    variNames.push(declaration.id.name)
+                try {
+                    for (let declaration in vrbDclNode.declarations) {
+                        variNames.push(declaration.id.name)
+                    }
+
+                    for (let variName in variNames) {
+                        path.rename(variName)
+                    }
+                } catch {}
+
+            },
+
+            MemberExpression(path) {
+                if (path.get('property').node.name == 'forEach') {
+                    path.get('property').node.name = 'myForEach';
+                    let arrForEachSourceString = `Array.prototype.myForEach = async function (fn, context = null) {
+                        let index = 0;
+                        let arr = this;
+                        if (typeof fn !== 'function') {
+                            throw new TypeError(fn + ' is not a function');
+                        }
+                        while (index < arr.length) {
+                            if (index in arr) {
+                                try {
+                                    await fn.call(context, arr[index], index, arr);
+                                } catch (e) {
+                                    console.log(e);
+                                }
+                            }
+                            index ++;
+                        }
+                    }`
+                    let topPath = path.findParent((path) => t.isProgram(path.node));
+                    let testNode = t.expressionStatement(
+                        t.assignmentExpression('=',
+                            path.scope.generateUidIdentifier("test"),
+                            path.scope.generateUidIdentifier("test")
+                        )
+                    )
+
+                    let bodyFirstNodePath = topPath.get('body.0')
+
+                    bodyFirstNodePath.insertBefore(testNode);
+                    bodyFirstNodePath = topPath.get('body.0')
+                    bodyFirstNodePath.replaceWithSourceString(arrForEachSourceString);
                 }
-
-                for (let variName in variNames) {
-                    path.rename(variName)
-                }
-
-
-
-
-
             }
         }
     }

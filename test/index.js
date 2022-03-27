@@ -1,7 +1,5 @@
-let a;
+let arr1 = [];
 
-let b = 1;
-
-for (let i = 1; i < 2; i++) {
-    setTimeout(function() {}, 100)
-}
+arr1.forEach(function(element) {
+    console.log(element);
+})
