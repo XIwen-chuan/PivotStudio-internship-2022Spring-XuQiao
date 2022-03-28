@@ -448,11 +448,6 @@ module.exports = ({ types: t }) => {
                     }`;
                     addAPISource(arrAPISourceString);
                 }
-
-
-
-
-
             }
         }
     }
