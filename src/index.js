@@ -3,10 +3,6 @@
 const { variableDeclaration } = require("@babel/types");
 
 
-let i = 1;
-let functionNameId;
-let functionName;
-
 function convertBlockScopedToVar(
     path,
     node,
@@ -30,6 +26,10 @@ function convertBlockScopedToVar(
         }
     }
 }
+
+let flag1 = true;
+let flag2 = true;
+let flag3 = true;
 
 
 module.exports = ({ types: t }) => {
@@ -367,9 +367,27 @@ module.exports = ({ types: t }) => {
             },
 
             MemberExpression(path) {
-                if (path.get('property').node.name == 'forEach') {
+
+                function addAPISource(sourceCode) {
+                    let topPath = path.findParent((path) => t.isProgram(path.node));
+                    let testNode = t.expressionStatement(
+                        t.assignmentExpression('=',
+                            path.scope.generateUidIdentifier("test"),
+                            path.scope.generateUidIdentifier("test")
+                        )
+                    )
+
+                    let bodyFirstNodePath = topPath.get('body.0');
+
+                    bodyFirstNodePath.insertBefore(testNode);
+                    bodyFirstNodePath = topPath.get('body.0');
+                    bodyFirstNodePath.replaceWithSourceString(sourceCode);
+                }
+
+                if (path.get('property').node.name == 'forEach' && flag1) {
                     path.get('property').node.name = 'myForEach';
-                    let arrForEachSourceString = `Array.prototype.myForEach = async function (fn, context = null) {
+                    flag1 = false;
+                    let arrAPISourceString = `Array.prototype.myForEach = async function (fn, context = null) {
                         let index = 0;
                         let arr = this;
                         if (typeof fn !== 'function') {
@@ -385,21 +403,56 @@ module.exports = ({ types: t }) => {
                             }
                             index ++;
                         }
-                    }`
-                    let topPath = path.findParent((path) => t.isProgram(path.node));
-                    let testNode = t.expressionStatement(
-                        t.assignmentExpression('=',
-                            path.scope.generateUidIdentifier("test"),
-                            path.scope.generateUidIdentifier("test")
-                        )
-                    )
-
-                    let bodyFirstNodePath = topPath.get('body.0')
-
-                    bodyFirstNodePath.insertBefore(testNode);
-                    bodyFirstNodePath = topPath.get('body.0')
-                    bodyFirstNodePath.replaceWithSourceString(arrForEachSourceString);
+                    }`;
+                    addAPISource(arrAPISourceString);
+                } else if (path.get('property').node.name == 'fliter' && flag2) {
+                    path.get('property').node.name = 'myFliter';
+                    flag2 = false;
+                    let arrAPISourceString = `Array.prototype.myFilter = function (fn, context = null) {
+                            let arr = this;
+                            let len = arr.length;
+                            let index = 0, k = 0;
+                            let newArr = [];
+                            if (typeof fn !== 'function') {
+                                throw new TypeError(fn + ' is not a function');
+                            }
+                            while (index < len) {
+                                if (index in arr) {
+                                    let result = fn.call(context, arr[index], index, arr);
+                                    if (result) newArr[k++] = arr[index]; // 如果返回值为真，就添加进新数组
+                                }
+                                index ++;
+                            }
+                            return newArr;
+                        }`;
+                    addAPISource(arrAPISourceString);
+                } else if (path.get('property').node.name == 'find' && flag3) {
+                    flag3 = false;
+                    let arrAPISourceString = `Array.prototype.myFind = function (fn, context = null) {
+                        let arr = this;
+                        let len = arr.length;
+                        let index = 0, k = 0;
+                        let targetValue;
+                        if (typeof fn !== 'function') {
+                            throw new TypeError(fn + ' is not a function');
+                        }
+                        while (index < len) {
+                            if (index in arr) {
+                                let result = fn.call(context, arr[index], index, arr);
+                                if (result) targetValue = arr[index];
+                                break; // 如果返回值为真，就添加进新数组
+                            }
+                            index++;
+                        }
+                        return targetValue;
+                    }`;
+                    addAPISource(arrAPISourceString);
                 }
+
+
+
+
+
             }
         }
     }
