@@ -27,14 +27,7 @@ function convertBlockScopedToVar(
     }
 };
 
-function createIIFE(mainBody) {
-    path.get('body').replaceWith(t.blockStatement(
-        [t.expressionStatement(t.callExpression(
-            t.functionExpression(t.identifier(''), [],
-                mainBody), []
-        ))], []
-    ))
-};
+
 
 let flag1 = true;
 let flag2 = true;
@@ -339,6 +332,14 @@ module.exports = ({ types: t }) => {
             },
 
             Loop(path) {
+                function createIIFE(mainBody) {
+                    path.get('body').replaceWith(t.blockStatement(
+                        [t.expressionStatement(t.callExpression(
+                            t.functionExpression(t.identifier(''), [],
+                                mainBody), []
+                        ))], []
+                    ))
+                };
                 //如果块作用域中的变量被内部函数引用，即存在闭包，则给当前代码套一层匿名自执行函数
 
                 //先判断是否是块级作用域

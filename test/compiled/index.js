@@ -1,11 +1,9 @@
-if (true) {
-  var foo = true;
-}
+var a = 1;
 
-if (true) {
-  var foo;
-
-  if (foo) {
-    console.log(foo);
-  }
+for (var a = 1; a < 10; a++) {
+  (function () {
+    setTimeout(function () {
+      console.log(a);
+    }, 1000);
+  })();
 }
