@@ -25,7 +25,16 @@ function convertBlockScopedToVar(
             scope.moveBindingTo(name, parentScope);
         }
     }
-}
+};
+
+function createIIFE(mainBody) {
+    path.get('body').replaceWith(t.blockStatement(
+        [t.expressionStatement(t.callExpression(
+            t.functionExpression(t.identifier(''), [],
+                mainBody), []
+        ))], []
+    ))
+};
 
 let flag1 = true;
 let flag2 = true;
@@ -39,131 +48,14 @@ module.exports = ({ types: t }) => {
             BinaryExpression(path) {
                 let pPath = path.findParent((path) => t.isProgram(path.node))
                 const node = path.node;
-                let hasInjected = false;
+                let hasInjected = true;
 
-                let leftNode = path.node.left;
+                let leftNode = node.left;
                 let leftValue = leftNode.value;
-                let rightNode = path.node.right;
+                let rightNode = node.right;
                 let rightValue = rightNode.value;
                 //判断表达式两边是否为数字
-                if (t.isNumericLiteral(node.left) && t.isNumericLiteral(node.right) && hasInjected == false) {
-
-                    pPath.get('body.0').insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmAdd"), [t.identifier("arg1"), t.identifier("arg2")],
-                        t.blockStatement([
-                            t.variableDeclaration("let", [t.variableDeclarator(
-                                t.identifier("multi"),
-                                t.callExpression(
-                                    t.identifier("_getMulti"), [
-                                        t.identifier("arg1"),
-                                        t.identifier("arg2")
-                                    ]
-                                )
-                            )]),
-                            t.returnStatement(
-                                t.binaryExpression("/",
-                                    t.binaryExpression("+",
-                                        t.binaryExpression("*",
-                                            t.identifier("arg1"),
-                                            t.identifier("multi")
-                                        ),
-                                        t.binaryExpression("*",
-                                            t.identifier("arg2"),
-                                            t.identifier("multi")
-                                        )
-                                    ),
-                                    t.identifier("multi")
-                                )
-                            )
-                        ], [])
-                    ))
-                    pPath.get('body.0').insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmMinus"), [t.identifier("arg1"), t.identifier("arg2")],
-                        t.blockStatement([
-                            t.variableDeclaration("let", [t.variableDeclarator(
-                                t.identifier("multi"),
-                                t.callExpression(
-                                    t.identifier("_getMulti"), [
-                                        t.identifier("arg1"),
-                                        t.identifier("arg2")
-                                    ]
-                                )
-                            )]),
-                            t.returnStatement(
-                                t.binaryExpression("/",
-                                    t.binaryExpression("-",
-                                        t.binaryExpression("*",
-                                            t.identifier("arg1"),
-                                            t.identifier("multi")
-                                        ),
-                                        t.binaryExpression("*",
-                                            t.identifier("arg2"),
-                                            t.identifier("multi")
-                                        )
-                                    ),
-                                    t.identifier("multi")
-                                )
-                            )
-                        ], [])
-                    ))
-                    pPath.get('body.0').insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmMulti"), [t.identifier("arg1"), t.identifier("arg2")],
-                        t.blockStatement([
-                            t.variableDeclaration("let", [t.variableDeclarator(
-                                t.identifier("multi"),
-                                t.callExpression(
-                                    t.identifier("_getMulti"), [
-                                        t.identifier("arg1"),
-                                        t.identifier("arg2")
-                                    ]
-                                )
-                            )]),
-                            t.returnStatement(
-                                t.binaryExpression("/",
-                                    t.binaryExpression("*",
-                                        t.binaryExpression("*",
-                                            t.identifier("arg1"),
-                                            t.identifier("multi")
-                                        ),
-                                        t.binaryExpression("*",
-                                            t.identifier("arg2"),
-                                            t.identifier("multi")
-                                        )
-                                    ),
-                                    t.binaryExpression("*",
-                                        t.identifier("multi"),
-                                        t.identifier("multi")
-                                    )
-                                )
-                            )
-                        ], [])
-                    ))
-                    pPath.get('body.0').insertBefore(t.functionDeclaration(
-                        t.identifier("_cstmDiv"), [t.identifier("arg1"), t.identifier("arg2")],
-                        t.blockStatement([
-                            t.variableDeclaration("let", [t.variableDeclarator(
-                                t.identifier("multi"),
-                                t.callExpression(
-                                    t.identifier("_getMulti"), [
-                                        t.identifier("arg1"),
-                                        t.identifier("arg2")
-                                    ]
-                                )
-                            )]),
-                            t.returnStatement(
-                                t.binaryExpression("/",
-                                    t.binaryExpression("*",
-                                        t.identifier("arg1"),
-                                        t.identifier("multi")
-                                    ),
-                                    t.binaryExpression("*",
-                                        t.identifier("arg2"),
-                                        t.identifier("multi")
-                                    )
-                                )
-                            )
-                        ], [])
-                    ))
+                if (t.isNumericLiteral(leftNode) && t.isNumericLiteral(rightNode) && hasInjected) {
                     pPath.get('body.0').insertBefore(t.functionDeclaration(
                         t.identifier("_getMulti"), [t.identifier("arg1"), t.identifier("arg2")],
                         t.blockStatement([
@@ -239,9 +131,37 @@ module.exports = ({ types: t }) => {
                             )
                         ], [])
                     ))
-
                     switch (node.operator) {
                         case "+":
+                            pPath.get('body.0').insertBefore(t.functionDeclaration(
+                                t.identifier("_cstmAdd"), [t.identifier("arg1"), t.identifier("arg2")],
+                                t.blockStatement([
+                                    t.variableDeclaration("let", [t.variableDeclarator(
+                                        t.identifier("multi"),
+                                        t.callExpression(
+                                            t.identifier("_getMulti"), [
+                                                t.identifier("arg1"),
+                                                t.identifier("arg2")
+                                            ]
+                                        )
+                                    )]),
+                                    t.returnStatement(
+                                        t.binaryExpression("/",
+                                            t.binaryExpression("+",
+                                                t.binaryExpression("*",
+                                                    t.identifier("arg1"),
+                                                    t.identifier("multi")
+                                                ),
+                                                t.binaryExpression("*",
+                                                    t.identifier("arg2"),
+                                                    t.identifier("multi")
+                                                )
+                                            ),
+                                            t.identifier("multi")
+                                        )
+                                    )
+                                ], [])
+                            ))
                             path.replaceWith(
                                 t.callExpression(
                                     t.identifier("_cstmAdd"), [
@@ -252,6 +172,35 @@ module.exports = ({ types: t }) => {
                             )
                             break
                         case "-":
+                            pPath.get('body.0').insertBefore(t.functionDeclaration(
+                                t.identifier("_cstmMinus"), [t.identifier("arg1"), t.identifier("arg2")],
+                                t.blockStatement([
+                                    t.variableDeclaration("let", [t.variableDeclarator(
+                                        t.identifier("multi"),
+                                        t.callExpression(
+                                            t.identifier("_getMulti"), [
+                                                t.identifier("arg1"),
+                                                t.identifier("arg2")
+                                            ]
+                                        )
+                                    )]),
+                                    t.returnStatement(
+                                        t.binaryExpression("/",
+                                            t.binaryExpression("-",
+                                                t.binaryExpression("*",
+                                                    t.identifier("arg1"),
+                                                    t.identifier("multi")
+                                                ),
+                                                t.binaryExpression("*",
+                                                    t.identifier("arg2"),
+                                                    t.identifier("multi")
+                                                )
+                                            ),
+                                            t.identifier("multi")
+                                        )
+                                    )
+                                ], [])
+                            ))
                             path.replaceWith(
                                 t.callExpression(
                                     t.identifier("_cstmMinus"), [
@@ -262,6 +211,38 @@ module.exports = ({ types: t }) => {
                             )
                             break
                         case "*":
+                            pPath.get('body.0').insertBefore(t.functionDeclaration(
+                                t.identifier("_cstmMulti"), [t.identifier("arg1"), t.identifier("arg2")],
+                                t.blockStatement([
+                                    t.variableDeclaration("let", [t.variableDeclarator(
+                                        t.identifier("multi"),
+                                        t.callExpression(
+                                            t.identifier("_getMulti"), [
+                                                t.identifier("arg1"),
+                                                t.identifier("arg2")
+                                            ]
+                                        )
+                                    )]),
+                                    t.returnStatement(
+                                        t.binaryExpression("/",
+                                            t.binaryExpression("*",
+                                                t.binaryExpression("*",
+                                                    t.identifier("arg1"),
+                                                    t.identifier("multi")
+                                                ),
+                                                t.binaryExpression("*",
+                                                    t.identifier("arg2"),
+                                                    t.identifier("multi")
+                                                )
+                                            ),
+                                            t.binaryExpression("*",
+                                                t.identifier("multi"),
+                                                t.identifier("multi")
+                                            )
+                                        )
+                                    )
+                                ], [])
+                            ))
                             path.replaceWith(
                                 t.callExpression(
                                     t.identifier("_cstmMulti"), [
@@ -272,6 +253,32 @@ module.exports = ({ types: t }) => {
                             )
                             break
                         case "/":
+                            pPath.get('body.0').insertBefore(t.functionDeclaration(
+                                t.identifier("_cstmDiv"), [t.identifier("arg1"), t.identifier("arg2")],
+                                t.blockStatement([
+                                    t.variableDeclaration("let", [t.variableDeclarator(
+                                        t.identifier("multi"),
+                                        t.callExpression(
+                                            t.identifier("_getMulti"), [
+                                                t.identifier("arg1"),
+                                                t.identifier("arg2")
+                                            ]
+                                        )
+                                    )]),
+                                    t.returnStatement(
+                                        t.binaryExpression("/",
+                                            t.binaryExpression("*",
+                                                t.identifier("arg1"),
+                                                t.identifier("multi")
+                                            ),
+                                            t.binaryExpression("*",
+                                                t.identifier("arg2"),
+                                                t.identifier("multi")
+                                            )
+                                        )
+                                    )
+                                ], [])
+                            ))
                             path.replaceWith(
                                 t.callExpression(
                                     t.identifier("_cstmDiv"), [
@@ -282,8 +289,7 @@ module.exports = ({ types: t }) => {
                             )
                             break
                     }
-
-                    hasInjected = true;
+                    hasInjected = false;
                 }
             },
 
@@ -303,7 +309,7 @@ module.exports = ({ types: t }) => {
                     newBlc
                 )
 
-                const subVisitor01 = {
+                const newVisitor1 = {
                     ThisExpression(subPath) {
                         path.scope.parent.push({ id: t.identifier("_this"), init: t.thisExpression() });
                         subPath.replaceWith(t.identifier("_this"))
@@ -312,7 +318,7 @@ module.exports = ({ types: t }) => {
 
                 path.traverse(newVisitor1);
                 path.replaceWith(newFuncNode);
-                i++;
+
             },
 
             //let编译为var要注意的几点：可能存在的块级作用域消失带来的变量重名问题，暂时性死区问题(?)，for循环的匿名自执行函数问题
@@ -341,12 +347,7 @@ module.exports = ({ types: t }) => {
                     vrbDclNode = path.node.init;
                     if (vrbDclNode.kind == 'let') {
                         let mainBody = path.node.body;
-                        path.get('body').replaceWith(t.blockStatement(
-                            [t.expressionStatement(t.callExpression(
-                                t.functionExpression(t.identifier(''), [],
-                                    mainBody), []
-                            ))], []
-                        ))
+                        createIIFE(mainBody);
                         return;
                     }
                 }

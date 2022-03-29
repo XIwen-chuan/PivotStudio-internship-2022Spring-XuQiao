@@ -1,11 +1,5 @@
-arr1.forEach(function(element) {
-    console.log(element);
-})
+let a = 1;
 
-arr1.fliter(function(element) {
-    console.log(element);
-})
-
-arr1.find(function(element) {
-    console.log(element);
-})
+for (let a = 1; a < 10; a++) {
+    setTimeout(function() { console.log(a) }, 1000)
+}
