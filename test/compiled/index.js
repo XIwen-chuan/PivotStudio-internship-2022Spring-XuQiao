@@ -1,9 +1,9 @@
 var a = 1;
 
-for (var a = 1; a < 10; a++) {
+for (var _a = 1; _a < 10; _a++) {
   (function () {
-    setTimeout(function () {
-      console.log(a);
-    }, 1000);
+    console.log(_a);
   })();
 }
+
+console.log(a);
