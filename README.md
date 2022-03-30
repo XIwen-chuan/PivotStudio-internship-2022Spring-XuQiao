@@ -233,3 +233,12 @@ arr1.myFind(function(val, index, arr) {
 |
 ...
 ```
+
+
+## 一些细节：
+- babel/types并没有直接的在编译中添加注释的方法，目前在 https://github.com/babel/babel/issues/5897 中查到有开发者在issue中提到要加相应的方法（类似于`t.comment(type, content)`）来创建注释，目前该issue还是open状态。在babel中注释并不作为一个单独的节点处理，而是作为某个节点的属性（`leadingComments`和`trailingComments`）。但是这个属性并不能在构建节点时加上，只能手动在节点对象添加属性。
+- `path.scope.rename(...)`可以将本作用域下的所有声明变量和对它们的引用改名，并保证不重复。
+- 为了防止编译时对相同方法重复创建补丁导致重复声明，我添加了一个布尔值进行验证，一旦创建了补丁函数，该布尔值就永久更改。
+- 对特定作用域下的某些节点的处理：新创建一个visitor对象，使用path.traverse(visitor)来进行新的深度优先遍历。
+- 在let编译为var时，对可能存在的块级作用域的处理：将原本的块级作用域中的所有代码套上一个匿名自执行函数来模拟块级作用域。函数作用域不做处理，只需要改名即可。需要注意的是，for循环中的小括号里由let声明的变量在编译后会称为上级作用域下的变量，为防止重名，我先获取这个变量和子作用域对其所有的引用，再使用`path.scope.rename(...)`改名。
+- 手写`Array.prototype.myForEach()`方法考虑了异步的情况。
