@@ -33,3 +33,7 @@ arr1.filter(function(val, index, arr) {
 arr1.find(function(val, index, arr) {
     if (index = 3) return true;
 })
+
+function test() {
+    let a = 1;
+}

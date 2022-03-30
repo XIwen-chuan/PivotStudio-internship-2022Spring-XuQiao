@@ -294,8 +294,10 @@
                  let newBlc;
 
                  if (t.isBlockStatement(path.node.body)) {
+                     //单语句无大括号
                      newBlc = path.node.body;
                  } else {
+                     //有大括号
                      newBlc = t.blockStatement(
                          [t.returnStatement(path.node.body)], [])
                  }
@@ -305,6 +307,7 @@
                      newBlc
                  )
 
+                 //this替换为_this
                  const subVisitor01 = {
                      ThisExpression(subPath) {
                          path.scope.parent.push({ id: t.identifier("_this"), init: t.thisExpression() });
@@ -364,6 +367,7 @@
 
              },
 
+             //数组方法polyfill
              MemberExpression(path) {
 
                  function addAPISource(sourceCode) {
