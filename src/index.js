@@ -1,9 +1,5 @@
  //插件编写：实现一个Babel计算器插件，用以改善原生JavaScript中浮点数精度丢失的现象，以实现低精度下的精准计算
 
- const { variableDeclaration } = require("@babel/types");
-
-
-
 
  let hasGetMulti = false,
      addInjected = false,
